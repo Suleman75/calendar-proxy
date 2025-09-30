@@ -4,26 +4,20 @@ const fetch = require("node-fetch");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Default route (sirf info dikhane ke liye)
-app.get("/", async (req, res) => {
-  const icsUrl = req.query.url;
-
-  if (!icsUrl) {
-    return res.send("✅ Calendar Proxy is running. Use this format: /?url=YOUR_ICS_FEED");
-  }
+// Fixed route for Google Calendar
+app.get("/proxy.ics", async (req, res) => {
+  const ICS_FEED = "https://gracebk.org/?post_type=tribe_events&ical=1";
 
   try {
-    const response = await fetch(icsUrl);
+    const response = await fetch(ICS_FEED);
     const data = await response.text();
 
-    res.setHeader("Content-Type", "text/calendar");
+    res.setHeader("Content-Type", "text/calendar; charset=utf-8");
     res.send(data);
   } catch (err) {
     console.error(err);
-    res.status(500).send("❌ Error fetching calendar");
+    res.status(500).send("Error fetching calendar");
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
