@@ -1,26 +1,31 @@
-const express = require('express');
-const fetch = require('node-fetch');
+const express = require("express");
+const fetch = require("node-fetch");
+
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-// 👇 Apna Events Calendar feed URL yahan daalo
-const WP_ICAL_URL = 'https://gracebk.org/?post_type=tribe_events&ical=1';
+app.get("/", (req, res) => {
+  res.send("Calendar Proxy is running ✅ Use /?url=YOUR_ICS_FEED");
+});
 
-app.get('/proxy.ics', async (req, res) => {
+app.get("/", async (req, res) => {
+  const icsUrl = req.query.url;
+  if (!icsUrl) {
+    return res.status(400).send("Missing ?url parameter");
+  }
+
   try {
-    const resp = await fetch(WP_ICAL_URL);
-    if (!resp.ok) {
-      res.status(500).send('Error fetching feed');
-      return;
-    }
-    const body = await resp.text();
+    const response = await fetch(icsUrl);
+    const data = await response.text();
 
-    res.set('Content-Type', 'text/calendar; charset=utf-8');
-    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.send(body);
+    res.setHeader("Content-Type", "text/calendar");
+    res.send(data);
   } catch (err) {
-    res.status(500).send('Error: ' + err.message);
+    console.error(err);
+    res.status(500).send("Error fetching calendar");
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Proxy running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
