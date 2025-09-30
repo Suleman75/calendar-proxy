@@ -4,14 +4,12 @@ const fetch = require("node-fetch");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.get("/", (req, res) => {
-  res.send("Calendar Proxy is running ✅ Use /?url=YOUR_ICS_FEED");
-});
-
+// Default route (sirf info dikhane ke liye)
 app.get("/", async (req, res) => {
   const icsUrl = req.query.url;
+
   if (!icsUrl) {
-    return res.status(400).send("Missing ?url parameter");
+    return res.send("✅ Calendar Proxy is running. Use this format: /?url=YOUR_ICS_FEED");
   }
 
   try {
@@ -22,7 +20,7 @@ app.get("/", async (req, res) => {
     res.send(data);
   } catch (err) {
     console.error(err);
-    res.status(500).send("Error fetching calendar");
+    res.status(500).send("❌ Error fetching calendar");
   }
 });
 
